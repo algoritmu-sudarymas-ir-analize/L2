@@ -11,6 +11,7 @@ namespace LD2_0
         private static int[] p;
 
         private static int[,] cache;
+        private static int[,] cache2; //temp
 
         private static int count = 0;
 
@@ -20,16 +21,18 @@ namespace LD2_0
 
             int max = 2000;
 
+
             var rand = new Random();
-            s = GetRandomArray(500,max);
-            p = GetRandomArray(500,max);
+            s = GetRandomArray(50_000, max);
+            p = GetRandomArray(50_000, max);
             int n = s.Length;
-            int w = (int)s.Average();
-            
+            int w = (int) s.Average();
+
             Console.WriteLine("Metodas;Dydis;Reiksme;Laikas;Veiksmai");
-            for (int i = 1; i <= 300; i ++)
+            for (int i = 1; i <= 30_000; i ++)
             {
                 cache = InitializeCache(i, w, -1);
+                cache2 = InitializeCache(i + 1, w + 1, -1);
 
                 Stopwatch st = Stopwatch.StartNew();
                 Console.Write($"Ga;{i};{Ga(i, w)};");
@@ -39,7 +42,14 @@ namespace LD2_0
 
                 st.Reset();
                 st.Start();
-                Console.Write($"Gb;{i};{Gb(i, w)};");
+//                Console.Write($"Gb;{i};{Gb(i, w)};");
+                st.Stop();
+ //               Console.WriteLine($"{st.Elapsed};{count}");
+                count = 0;
+
+                st.Reset();
+                st.Start();
+                Console.Write($"Gc;{i};{Gc(i, w)};");
                 st.Stop();
                 Console.WriteLine($"{st.Elapsed};{count}");
                 count = 0;
@@ -57,6 +67,25 @@ namespace LD2_0
             else return Math.Max(Ga(k - 1, r), p[k - 1] + Ga(k - 1, r - s[k - 1]));
         }
 
+        // Ga Bottom up
+        static int Gc(int k, int r)
+        {
+            for (int kk = 0; kk <= k; kk++)
+            for (int rr = 0; rr <= r; rr++)
+            {
+                count++;
+                if (rr == 0 || kk == 0) cache2[kk, rr] = 0;
+
+                else if (s[kk - 1] > rr) cache2[kk, rr] = cache2[kk - 1, rr];
+
+                else cache2[kk, rr] = Math.Max(cache2[kk - 1, rr], p[kk - 1] + cache2[kk - 1, rr - s[kk - 1]]);
+            }
+
+            return cache2[k, r];
+        }
+
+
+        // Ga Top Down
         static int Gb(int k, int r)
         {
             count++; //performance test
