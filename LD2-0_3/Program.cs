@@ -1,36 +1,39 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace LD2_0_3
+namespace LD2_0
 {
-    internal class Program
+    internal static class Program
     {
         private static int[] s;
         private static int[] p;
 
-        private static int[,] cache;
-
         public static void Main(string[] args)
         {
-            //  int max = int.Parse(args[0]);
-
             int max = 2000;
 
-            var rand = new Random();
-            s = GetRandomArray(500, max);
-            p = GetRandomArray(500, max);
-            int n = s.Length;
-            int w = (int) s.Average();
-            Stopwatch st = Stopwatch.StartNew();
+            // 2CPU -> 4VCPU
+            ThreadPool.SetMaxThreads(2, 2);
 
+            s = GetRandomArray(50_000, max);
+            p = GetRandomArray(50_000, max);
+            int n = s.Length;
+            Stopwatch time = new Stopwatch();
             Console.WriteLine("Metodas;Dydis;Reiksme;Laikas");
-            for (int i = 1; i <= 300; i++)
+            for (int i = 1, w = 1; i <= 30_000; i++, w++)
             {
+                time.Restart();
                 Console.Write($"Ga;{i};{Ga(i, w)};");
-                st.Stop();
-                Console.WriteLine($"{st.Elapsed}");
-                st.Reset();
+                time.Stop();
+                Console.WriteLine($"{time.Elapsed}");
+
+                time.Restart();
+                Console.Write($"Gb;{i};{Gb(i, w)};");
+                time.Stop();
+                Console.WriteLine($"{time.Elapsed}");
             }
         }
 
@@ -43,6 +46,23 @@ namespace LD2_0_3
 
             else return Math.Max(Ga(k - 1, r), p[k - 1] + Ga(k - 1, r - s[k - 1]));
         }
+
+        static int Gb(int k, int r)
+        {
+            if (r == 0 || k == 0) return 0;
+
+            if (s[k - 1] > r) return Ga(k - 1, r);
+
+            int res1 = -1, res2 = -1;
+            Task[] arr =
+            {
+                Task.Factory.StartNew(() => { res1 = Ga(k - 1, r); }),
+                Task.Factory.StartNew(() => { res2 = p[k - 1] + Ga(k - 1, r - s[k - 1]); })
+            };
+            Task.WaitAll(arr);
+            return Math.Max(res1, res2);
+        }
+
 
         private static int[] GetRandomArray(int length, int max)
         {
