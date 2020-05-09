@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 
 namespace LD2_0
 {
@@ -26,10 +25,10 @@ namespace LD2_0
             s = GetRandomArray(50_000, max);
             p = GetRandomArray(50_000, max);
             int n = s.Length;
-            int w = (int) s.Average();
+            
 
             Console.WriteLine("Metodas;Dydis;Reiksme;Laikas;Veiksmai");
-            for (int i = 1; i <= 30_000; i ++)
+            for (int i = 1, w = 1; i <= 30_000; i++, w++)
             {
                 cache = InitializeCache(i, w, -1);
                 cache2 = InitializeCache(i + 1, w + 1, -1);
@@ -40,15 +39,7 @@ namespace LD2_0
                 Console.WriteLine($"{st.Elapsed};{count}");
                 count = 0;
 
-                st.Reset();
-                st.Start();
-//                Console.Write($"Gb;{i};{Gb(i, w)};");
-                st.Stop();
- //               Console.WriteLine($"{st.Elapsed};{count}");
-                count = 0;
-
-                st.Reset();
-                st.Start();
+                st.Restart();
                 Console.Write($"Gc;{i};{Gc(i, w)};");
                 st.Stop();
                 Console.WriteLine($"{st.Elapsed};{count}");
