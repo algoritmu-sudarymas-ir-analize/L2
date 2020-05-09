@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 
 namespace LD2_0
@@ -36,7 +35,6 @@ namespace LD2_0
             }
         }
 
-
         static int Ga(int k, int r)
         {
             if (r == 0 || k == 0) return 0;
@@ -50,23 +48,27 @@ namespace LD2_0
         {
             if (r == 0 || k == 0) return 0;
 
-            var countdown = new CountdownEvent(1);
-            int res1 = -1;
+            if (s[k - 1] > r) return Ga(k - 1, r);
 
-            ThreadPool.QueueUserWorkItem(_ =>
-            {
-                res1 = Ga(k - 1, r);
-                countdown.Signal();
-            });
+            int res1 = -1, res2 = -1;
 
-            if (s[k - 1] > r)
+            using (var countdown = new CountdownEvent(2))
             {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    res1 = Ga(k - 1, r);
+                    countdown.Signal();
+                });
+
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    res2 = p[k - 1] + Ga(k - 1, r - s[k - 1]);
+                    countdown.Signal();
+                });
+
                 countdown.Wait();
-                return res1;
             }
-                
-            int res2 = p[k - 1] + Ga(k - 1, r - s[k - 1]);
-            countdown.Wait();
+
             return Math.Max(res1, res2);
         }
 
