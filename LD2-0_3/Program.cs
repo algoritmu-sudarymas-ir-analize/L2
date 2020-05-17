@@ -11,18 +11,12 @@ namespace LD2_0
 
         public static void Main(string[] args)
         {
-//            int max = 2000;
-
             // 2CPU -> 4VCPU
             ThreadPool.SetMaxThreads(2, 2);
 
-//            s = GetRandomArray(50_000, max);
-//            p = GetRandomArray(50_000, max);
-	    s = new int[50_000];
-	    p = new int[50_000];
-	    Array.Fill<int>(s, 1);
-	    Array.Fill<int>(p, 1);
-            int n = s.Length;
+            s = GetArray(50_000, 1);
+            p = GetArray(50_000, 1);
+
             Stopwatch time = new Stopwatch();
             Console.WriteLine("Metodas;Dydis;Reiksme;Laikas");
             for (int i = 1, w = 1; i <= 30_000; i++, w++)
@@ -76,13 +70,12 @@ namespace LD2_0
             return Math.Max(res1, res2);
         }
 
-        private static int[] GetRandomArray(int length, int max)
+        private static int[] GetArray(int length, int fill)
         {
             var arr = new int[length];
-            var rand = new Random();
 
             for (int i = 0; i < length; i++)
-                arr[i] = rand.Next(max);
+                arr[i] = fill;
 
             return arr;
         }
